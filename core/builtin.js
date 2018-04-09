@@ -1,17 +1,10 @@
 var BuiltInTypes = {
-    //Age:                    'builtin.age',
-    //Dimension:              'builtin.dimension',
-    //Email:                  'builtin.email',
-    //Money:                  'builtin.money',
     Number:                 'builtin.number',
     Ordinal:                'builtin.ordinal',
     Percentage:             'builtin.percentage',
-    Couleur:                'builtin.color',
-    Tendance:               'builtin.trending',
-    Secteur:                'builtin.sector',
-    //PhoneNumber:            'builtin.phonenumber',
-    //Temperature:            'builtin.temperature',
-    //Url:                    'builtin.url',
+    Couleur:                'builtin.Couleur',
+    Tendance:               'builtin.Tendance',
+    Secteur:                'builtin.Secteur',
 /*    
     DateTime: {
         Date:               'builtin.datetime.date',

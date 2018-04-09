@@ -382,7 +382,8 @@ function extractParametersFromEntities(schema, entities, actionModel) {
 
     // merge entities into parameters obj
     var parameters = _.reduce(entities, function (merged, entity) {
-        merged[entity.type] = entity.entity;
+        merged[entity.type] = entity.resolution.values[0];
+        //merged[entity.type] = entity.entity;
         return merged;
     }, {});
 

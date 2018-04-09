@@ -10,7 +10,7 @@ var FindIndicatorAction = {
         Secteur: {
             type: 'string',
             builtInType: LuisActions.BuiltInTypes.Secteur,
-            message: 'Merci de spécifier un bureau'
+            optional: true,
         },
         Couleur: {
             type: 'string',
@@ -24,11 +24,17 @@ var FindIndicatorAction = {
         }
     },
     // Action fulfillment method, recieves parameters as keyed-object (parameters argument) and a callback function to invoke with the fulfillment result.
-    fulfill: function (parameters, callback) {
-        callback(util.format('Indicateur trouvés pour %s avec la couleur: %s et la tendance: %s',
-            parameters.Secteur, parameters.Couleur, parameters.Tendance));
-    }
+    fulfill: actionfulfill
 };
+
+function actionfulfill (parameters, callback){
+    var sectorValue = parameters.Secteur ? parameters.Secteur : 'tous les secteurs';
+    var colorValue = parameters.Couleur ? parameters.Couleur : 'Toutes';
+    var trendingValue = parameters.Tendance ? parameters.Tendance : 'Toutes';
+
+    callback(util.format('Indicateur trouvés pour %s avec la couleur: %s et la tendance: %s',
+        sectorValue, colorValue, trendingValue));
+}
 
 // Contextual action that changes location for the FindHotelsAction
 /*

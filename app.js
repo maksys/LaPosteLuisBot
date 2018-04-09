@@ -5,6 +5,9 @@ var restify = require('restify');
 
 var LuisActions = require('./core');
 var SampleActions = require('./luis_actions/all');
+
+//var searchContext = require('./searchContext');
+
 var LuisModelUrl = process.env.LUIS_MODEL_URL;
 
 var server = restify.createServer();
@@ -26,6 +29,8 @@ var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
+
+//var connector = new builder.ChatConnector();
 server.post('/api/messages', connector.listen());
 
 var bot = new builder.UniversalBot(connector);
@@ -41,7 +46,7 @@ LuisActions.bindToBotDialog(bot, intentDialog, LuisModelUrl, SampleActions, {
 
 function DefaultReplyHandler(session) {
     session.endDialog(
-        'Désolé je n\'ai pas compris "%s". Merci d\'utiliser des phrases comme "Quels sont les indicateurs stable pour Paris"',
+        'Désolé je n\'ai pas compris "%s". Merci d\'utiliser des phrases comme "Quels sont les indicateurs stables pour Paris"',
         session.message.text);
 }
 
@@ -50,21 +55,28 @@ function FulfillReplyHandler(session, actionModel) {
 
     // We found things
     if (actionModel.intentName === 'Afficher_Indicateurs'){
-        var reply = createEventMessage("searchResult", actionModel.parameters, session.message.address);
-        session.send(reply);
+        handleSearch(session, actionModel);
     } else if (actionModel.intentName === 'Reset'){
         var reply = createEventMessage("reset", actionModel.parameters, session.message.address);
         session.send(reply);
     } else if (actionModel.intentName === 'Aide'){
-        var card = createCardMessage(session, actionModel.parameters);
+        var timer = 0;
         if (!actionModel.parameters.EntityTypes){
             session
             .send("Je peux vous afficher les indicateurs en les filtrant sur un secteur, une tendance ou une couleur. Demandez moi par exemple « Quels sont les bons(vert) indicateurs stables (tendance) sur Paris (Secteur) ? »")
+            timer = 1500;
         }
-        session.send(card);
+        setTimeout(timedHelpCard, timer, session, actionModel.parameters);
+        // var card = createCardMessage(session, actionModel.parameters);
+        // session.send(card);
     }
 
     session.endDialog(actionModel.result.toString());
+}
+
+function timedHelpCard(session, parameters){
+    var card = createCardMessage(session, parameters);
+    session.send(card);
 }
 
 function onContextCreationHandler(action, actionModel, next, session) {
@@ -82,6 +94,27 @@ function onContextCreationHandler(action, actionModel, next, session) {
     // }
 
     next();
+}
+
+function handleSearch(session, actionModel){
+    if (actionModel.parameters.Secteur === 'unknow'){
+        session.send("Désolé, je ne connais pas le secteur demandé...");
+        var msg = new builder.Message(session);
+        msg.addAttachment(buildSectorsCard(session));            
+        session.send(msg);
+        return;
+    }
+    if (actionModel.parameters.Couleur === 'unknow'){
+        session.send("Désoloé, je ne connais pas la couleur demandée...");
+        var msg = new builder.Message(session);
+        msg.attachmentLayout(builder.AttachmentLayout.carousel)
+        msg.attachments(buildColorsCard(session));             
+        session.send(msg);
+        return;        
+    }
+
+    var reply = createEventMessage("searchResult", actionModel.parameters, session.message.address);
+    session.send(reply);
 }
 
 const createCardMessage = (session, parameters) => {

@@ -1,9 +1,9 @@
 var util = require('util');
 var LuisActions = require('../core');
 
-var ResetAction = {
-    intentName: 'Reset',
-    friendlyName: "Recommencer",
+var HelpAction = {
+    intentName: 'Accueil',
+    friendlyName: "Salutation",
     confirmOnContextSwitch: true,           // true by default
     schema: {
         Secteur: {
@@ -27,13 +27,10 @@ var ResetAction = {
 };
 
 function actionFulfill (parameters, callback) {
-    LastSector = 'tous les secteurs';
-    LastColor = 'toutes les couleurs';
-    LastTrending = 'toutes les tendances';        
-
-    callback("J'espère vous avoir été utile.");
+    callback("Bonjour, en quoi puis-je vous aider ?");
+    //callback("Je peux vous afficher les indicateurs en les filtrant sur un secteur, une tendance ou une couleur. Demandez moi par exemple « Quels sont les bons(vert) indicateurs stables (tendance) sur Paris (Secteur) ? »");
 }
 
 module.exports = [
-    ResetAction,
+    HelpAction,
 ];

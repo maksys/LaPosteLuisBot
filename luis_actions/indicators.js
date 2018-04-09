@@ -1,6 +1,8 @@
 var util = require('util');
 var LuisActions = require('../core');
 
+var searchContext = require('../searchContext');
+
 var FindIndicatorAction = {
     intentName: 'Afficher_Indicateurs',
     friendlyName: 'Afficher les indicateurs',
@@ -28,88 +30,39 @@ var FindIndicatorAction = {
 };
 
 function actionfulfill (parameters, callback){
-    var sectorValue = parameters.Secteur ? parameters.Secteur : 'tous les secteurs';
-    var colorValue = parameters.Couleur ? parameters.Couleur : 'Toutes';
-    var trendingValue = parameters.Tendance ? parameters.Tendance : 'Toutes';
+    if (parameters.Secteur === 'unknow' || parameters.Couleur === 'unknow'){
+        callback('');
+        return;
+    }
+    LastSector = parameters.Secteur ? parameters.Secteur : LastSector;
+    LastColor = parameters.Couleur ? parameters.Couleur : LastColor;
+    LastTrending = parameters.Tendance ? parameters.Tendance : LastTrending;
 
-    callback(util.format('Indicateur trouvés pour %s avec la couleur: %s et la tendance: %s',
-        sectorValue, colorValue, trendingValue));
+    var sectorText = LastSector === 'Tous' ? 'tous les secteurs' : LastSector;
+    var colorText = '';
+    if (LastColor === 'Toutes' || LastColor === 'Toute' || LastColor === 'toutes les couleurs'){
+        colorText = 'toutes les couleurs'
+    } else {
+        colorText = util.format('de couleur \"%s\"', LastColor);        
+    }
+ 
+    var trendingText = '';
+    if (LastTrending === 'Toutes' || LastTrending === 'Toute' || LastTrending === 'toutes les tendances'){
+        trendingText = 'toutes les tendances';
+    } else {
+        if (LastTrending === 'Hausse'){
+            trendingText = 'à la hausse';
+        } else if (LastTrending === 'Baisse'){
+            trendingText = 'à la baisse'
+        } else {
+            trendingText = 'stables'
+        }
+    }
+
+    callback(util.format('Résultats pour %s, %s et %s',
+        sectorText, colorText, trendingText));
 }
-
-// Contextual action that changes location for the FindHotelsAction
-/*
-var FindHotelsAction_ChangeLocation = {
-    intentName: 'FindHotels-ChangeLocation',
-    friendlyName: 'Change the Hotel Location',
-    parentAction: FindHotelsAction,
-    canExecuteWithoutContext: true,         // true by default
-    schema: {
-        Place: {
-            type: 'string',
-            builtInType: LuisActions.BuiltInTypes.Geography.City,
-            message: 'Please provide a new location for your hotel'
-        }
-    },
-    fulfill: function (parameters, callback, parentContextParameters) {
-        // assign new location to FindHotelsAction
-        parentContextParameters.Place = parameters.Place;
-
-        callback('Hotel location changed to ' + parameters.Place);
-    }
-};
-*/
-
-// Contextual action that changes Checkin for the FindHotelsAction
-/*
-var FindHotelsAction_ChangeCheckin = {
-    intentName: 'FindHotels-ChangeCheckin',
-    friendlyName: 'Change the hotel check-in date',
-    parentAction: FindHotelsAction,
-    canExecuteWithoutContext: false,
-    schema: {
-        Checkin: {
-            type: 'date',
-            builtInType: LuisActions.BuiltInTypes.DateTime.Date,
-            validDate: true, message: 'Please provide the new check-in date'
-        }
-    },
-    fulfill: function (parameters, callback, parentContextParameters) {
-        parentContextParameters.Checkin = parameters.Checkin;
-        callback('Hotel check-in date changed to ' + formatDate(parameters.Checkin));
-    }
-};
-*/
-
-// Contextual action that changes CheckOut for the FindHotelsAction
-/*
-var FindHotelsAction_ChangeCheckout = {
-    intentName: 'FindHotels-ChangeCheckout',
-    friendlyName: 'Change the hotel check-out date',
-    parentAction: FindHotelsAction,
-    canExecuteWithoutContext: false,
-    schema: {
-        Checkout: {
-            type: 'date',
-            builtInType: LuisActions.BuiltInTypes.DateTime.Date,
-            validDate: true, message: 'Please provide the new check-out date'
-        }
-    },
-    fulfill: function (parameters, callback, parentContextParameters) {
-        parentContextParameters.Checkout = parameters.Checkout;
-        callback('Hotel check-out date changed to ' + formatDate(parameters.Checkout));
-    }
-};
-*/
 
 module.exports = [
-    FindIndicatorAction,
-    //FindHotelsAction_ChangeLocation,
-    //FindHotelsAction_ChangeCheckin,
-    //FindHotelsAction_ChangeCheckout
+    FindIndicatorAction
 ];
-/*
-function formatDate(date) {
-    var offset = date.getTimezoneOffset() * 60000;
-    return new Date(date.getTime() + offset).toDateString();
-}
-*/
